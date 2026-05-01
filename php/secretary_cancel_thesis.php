@@ -1,0 +1,141 @@
+<?php
+session_start();
+
+include("database_connection.php");
+include("functions.php");
+
+if (isset($_SESSION['role']) && $_SESSION['role'] === "secretary") {
+    $user = login_session_secretary($connection);
+    $_SESSION['email'] = $user['Secretary_name'] . " " . $user['Secretary_surname'];
+    if ($_SERVER['REQUEST_METHOD'] === "POST" && isset($_POST['cancel_thesis'])) {
+        $student_am = $_POST['student_am'];
+        $gm_number = $_POST['gm_number'];
+        $gm_year = $_POST['gm_year'];
+        $sql = "SELECT Thesis_ID FROM thesis WHERE Thesis_Student = ?";
+        $stmt = mysqli_prepare($connection, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $student_am);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
+        $row   = $res ? mysqli_fetch_assoc($res) : null;
+        mysqli_stmt_close($stmt);
+
+        if ($row) {
+            $thesis_number = $row['Thesis_ID'];
+            $sql2 = "UPDATE thesis SET Thesis_Status = 'cancel'
+                     WHERE Thesis_Student = ? AND Thesis_Status = 'active'";
+            $stmt2 = mysqli_prepare($connection, $sql2);
+            mysqli_stmt_bind_param($stmt2, "i", $student_am);
+            mysqli_stmt_execute($stmt2);
+            $affected = mysqli_stmt_affected_rows($stmt2);
+            mysqli_stmt_close($stmt2);
+
+            if ($affected > 0) {
+                $sql3 = "INSERT INTO thesis_cancellation (Thesis_ID, General_Meeting_Number, General_Meeting_Year, Cancellation_Reason)
+                         VALUES (?, ?, ?, 'Κατόπιν αίτησης Φοιτητή/τριας.')";
+                $stmt3 = mysqli_prepare($connection, $sql3);
+                mysqli_stmt_bind_param($stmt3, "iii", $thesis_number, $gm_number, $gm_year);
+                mysqli_stmt_execute($stmt3);
+                mysqli_stmt_close($stmt3);
+
+                $sql4 = "INSERT INTO thesis_date (Thesis_ID, Thesis_Date, Thesis_Status)
+                         VALUES (?, NOW(), 'cancel')";
+                $stmt4 = mysqli_prepare($connection, $sql4);
+                mysqli_stmt_bind_param($stmt4, "i", $thesis_number);
+                mysqli_stmt_execute($stmt4);
+                mysqli_stmt_close($stmt4);
+                $message = '<div class="alert alert-success text-center"> Η κατάσταση της διατριβής έχει οριστεί σε ακύρωση.</div>';
+                // echo "Thesis status set to cancel.";
+            } else {
+                $message = '<div class="alert alert-success text-center">Δεν βρέθηκε ενεργή διατριβή για τον φοιτητή AM: '.  $student_am. '</div>';
+
+                // echo "No active thesis found for student AM: " . $student_am;
+            }
+        } else {
+            $message = '<div class="alert alert-success text-center"> Αυτός ο Φοιτητής δεν υπάρχει</div>';
+
+            // echo "This student doesn’t exist!";
+        }
+
+        header("refresh:5; url=./secretary_page.php");
+        // exit;
+    }
+} else {
+    echo '<script type="text/javascript">
+            alert("You do not have permission to access this page.");
+            history.back();
+          </script>';
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ακύρωση Διπλωματικής Εργασίας</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <button class="btn btn-outline-light me-2 d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle sidebar">
+      ☰ Μενού
+    </button>
+
+    <a class="navbar-brand">Η Πλατφόρμα</a>
+    <a href="secretary_page.php" class="btn btn-success ms-2">Αρχική</a>
+
+            <div class="ms-auto">
+            <a href="logout.php" class="btn btn-danger">Αποσύνδεση</a>
+        </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <?php
+include "secretary_sidebar.php";
+    ?>
+</nav>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <main class="col-md-8 col-lg-9 ms-sm-auto px-3 px-md-4 pt-4">
+      <div class="card shadow-lg p-4">
+        <h2 class="mb-4 text-center text-primary">Ακύρωση Διπλωματικής Εργασίας</h2>
+        
+       <?php
+    if (!empty($message)) {
+        echo $message;
+    }
+    ?>
+
+        <form method="POST" action="secretary_cancel_thesis.php" enctype="multipart/form-data">
+            
+            <div class="mb-3">
+                <label for="student_am" class="form-label fw-bold">Εισαγωγή Αριθμού Φοιτητή που επιθυμείτε να ακυρώσετε την Διπλωματική Εργασία:</label>
+                <input type="text"class="form-control" id="student_am" name="student_am"  placeholder="Πληκτρολογήστε τον Αριθμό του Φοιτητή..." required>
+            </div>
+
+            <div class="mb-3">
+                <label for="gm_number"  class="form-label fw-bold">Αριθμός Γενικής Συνέλευσης:</label>
+                <input type="text" id="gm_number" class="form-control" name="gm_number" placeholder="Πληκτρολογήστε το Αριθμό Γενικής Συνέλευσης..."  required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="gm_number"  class="form-label fw-bold">Χρονιά Γενικής Συνέλευσης:</label>
+                <input type="text" id="gm_year" class="form-control" name="gm_year" placeholder="Πληκτρολογήστε τη Χρονιά Γενικής Συνέλευσης..."  required>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" id="cancel_thesis" name="cancel_thesis" class="btn btn-primary btn-lg">
+                    Ακύρωση Διπλωματικής Εργασίας
+                </button>
+            </div>
+        </form>
+    </div>
+    </main>
+</div>
+</body>
+</html>

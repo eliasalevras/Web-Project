@@ -1,0 +1,19 @@
+<?php
+    session_start();
+    if(isset($_SESSION['User_ID']))
+    {
+        unset($_SESSION['User_ID']);
+    }
+    if(isset($_SESSION['role']))
+    {
+        unset($_SESSION['role']);
+    }
+    if(isset($_SESSION['email'])){
+        unset($_SESSION['email']);
+    }
+    if(isset($_SESSION['username'])){
+        unset($_SESSION['username']);
+    }
+    header("Location: login.php");
+    exit;
+?>

@@ -1,0 +1,42 @@
+[
+    {
+        "professor": "Eleni Voyiatzaki",
+        "student": "Makis Makopoulos",
+        "title": "10001",
+        "date": "2025-09-19",
+        "time": "29:08:33",
+        "type": "online",
+        "room": null,
+        "link": "www.ceid.com"
+    },
+    {
+        "professor": "Eleni Voyiatzaki",
+        "student": "John Lennon",
+        "title": "\u0394\u03b9\u03c0\u03bb\u03c9\u03bc\u03b1\u03c4\u03b9\u03ba\u03ae \u0395\u03c1\u03b3\u03b1\u03c3\u03af\u03b1 1",
+        "date": "2025-10-02",
+        "time": "21:00:00",
+        "type": "in_person",
+        "room": "\u0391\u03af\u03b8\u03bf\u03c5\u03c3\u03b1 \u0391",
+        "link": null
+    },
+    {
+        "professor": "Kostas Kalantas",
+        "student": "Petros Verikokos",
+        "title": "\u0394\u03b9\u03c0\u03bb\u03c9\u03bc\u03b1\u03c4\u03b9\u03ba\u03ae \u0395\u03c1\u03b3\u03b1\u03c3\u03af\u03b1 2",
+        "date": "2025-10-03",
+        "time": "10:30:00",
+        "type": "online",
+        "room": null,
+        "link": "https:\/\/www.ceid.upatras.gr\/"
+    },
+    {
+        "professor": "Eleni Voyiatzaki",
+        "student": "Lana Del Rey ",
+        "title": "\u0394\u03b9\u03c0\u03bb\u03c9\u03bc\u03b1\u03c4\u03b9\u03ba\u03ae \u0395\u03c1\u03b3\u03b1\u03c3\u03af\u03b1 9",
+        "date": "2025-10-06",
+        "time": "00:00:00",
+        "type": "in_person",
+        "room": "\u0391\u03af\u03b8\u03bf\u03c5\u03c3\u03b1 \u0392",
+        "link": null
+    }
+]
